@@ -9,9 +9,10 @@ from scipy.spatial import distance
 app = FastAPI()
 
 model_url = "https://tfhub.dev/tensorflow/efficientnet/lite0/feature-vector/2"
-IMAGE_SHAPE = (224, 224)
-layer = hub.KerasLayer(model_url)
+layer = hub.KerasLayer(model_url, trainable=False)
 model = tf.keras.Sequential([layer])
+
+IMAGE_SHAPE = (224, 224)
 
 @app.post("/compare_images")
 async def compare_images(file1: UploadFile = File(...), file2: UploadFile = File(...)):
