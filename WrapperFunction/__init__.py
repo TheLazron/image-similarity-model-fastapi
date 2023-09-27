@@ -1,10 +1,12 @@
 import uvicorn
+import imghdr
 from fastapi import FastAPI, File, UploadFile
 from PIL import Image
 import numpy as np
 import tensorflow as tf
 import tensorflow_hub as hub
 from scipy.spatial import distance
+import azure.functions as func
 
 app = FastAPI()
 
@@ -16,8 +18,10 @@ IMAGE_SHAPE = (224, 224)
 
 @app.post("/compare_images")
 async def compare_images(file1: UploadFile = File(...), file2: UploadFile = File(...)):
+
     image1 = Image.open(file1.file).convert('L').resize(IMAGE_SHAPE)
     image2 = Image.open(file2.file).convert('L').resize(IMAGE_SHAPE)
+
 
     image1 = np.stack((image1,)*3, axis=-1)
     image2 = np.stack((image2,)*3, axis=-1)
@@ -32,6 +36,3 @@ async def compare_images(file1: UploadFile = File(...), file2: UploadFile = File
     distance_metric = distance.cdist([feature_vector1], [feature_vector2], metric)[0]
 
     return {"distance": distance_metric.tolist()}
-
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
